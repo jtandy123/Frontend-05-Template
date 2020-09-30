@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Andy">
+  <title>Tic Tac Toe</title>
+  <style>
+    .cell {
+      width: 100px;
+      height: 100px;
+      display: inline-block;
+      vertical-align: middle;
+      background-color: green;
+      border: solid 1px #FFF;
+      line-height: 100px;
+      text-align: center;
+      font-size: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script>
+    let nextColor = 1; // 0表示空，1表示❌，2表示⭕️
+    let isGameOver = false;
+    let board = [
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0]
+    ];
+
+    function clone(data) {
+      return JSON.parse(JSON.stringify(data));
+    }
+
+    function getPlayerSymbol(color) {
+      return color === 1 ? '❌' : '⭕️';
+    }
+
+    function checkWin2(board, color) {
+      const lines = [
+        [[0, 0], [0, 1], [0, 2]],
+        [[1, 0], [1, 1], [1, 2]],
+        [[2, 0], [2, 1], [2, 2]],
+        [[0, 0], [1, 0], [2, 0]],
+        [[0, 1], [1, 1], [2, 1]],
+        [[0, 2], [1, 2], [2, 2]],
+        [[0, 0], [1, 1], [2, 2]],
+        [[0, 2], [1, 1], [2, 0]]
+      ];
+      for (let line of lines) {
+        const [a, b, c] = line;
+        if (board[a[0]][a[1]] === board[b[0]][b[1]] && board[b[0]][b[1]] === board[c[0]][c[1]]) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function checkWin(board, color) {
+      // 横向
+      for (let y = 0; y < 3; y++) {
+        let win = true;
+        for (let x = 0; x < 3; x++) {
+          if (board[y][x] !== color) {
+            win = false;
+          }
+        }
+        if (win) {
+          return win;
+        }
+      }
+
+      //  竖向
+      for (let y = 0; y < 3; y++) {
+        let win = true;
+        for (let x = 0; x < 3; x++) {
+          if (board[x][y] !== color) {
+            win = false;
+          }
+        }
+        if (win) {
+          return win;
+        }
+      }
+
+      {
+        // 左上右下
+        let win = true;
+        for (let y = 0; y < 3; y++) {
+          if (board[y][y] !== color) {
+            win = false;
+          }
+        }
+        if (win) {
+          return win;
+        }
+      }
+
+      { // 右上左下
+        let win = true;
+        for (let y = 0; y < 3; y++) {
+          if (board[y][2 - y] !== color) {
+            win = false;
+          }
+        }
+        if (win) {
+          return win;
+        }
+      }
+      return false;
+    }
+
+    function checkWillWin(board, color) {
+      for (y = 0; y < 3; y++) {
+        for (x  = 0; x < 3; x++) {
+          if (board[y][x] !== 0) {
+            continue;
+          }
+          const tempBoard = clone(board);
+          tempBoard[y][x] = color;
+          if (checkWin(tempBoard, color)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function move(x, y, color) {
+      if (board[y][x] !== 0 || isGameOver) {
+        return;
+      }
+      board[y][x] = color;
+      show();
+      if (checkWin(board, color)) {
+        console.log(`${getPlayerSymbol(color)} win`);
+        isGameOver = true;
+        return;
+      }
+      nextColor = 3 - color;
+      if (checkWillWin(board, nextColor)) {
+        console.log(`${getPlayerSymbol(nextColor)} will win`);
+      }
+    }
+
+    function show() {
+      let container = document.getElementById('root');
+      container.innerHTML = '';
+
+      for (let y = 0; y < 3; y++) {
+        for (let x = 0; x < 3; x++) {
+          let cell = document.createElement('div');
+          cell.addEventListener('click', () => move(x, y, nextColor))
+          cell.classList.add('cell');
+          cell.textContent = board[y][x] === 1 ? getPlayerSymbol(board[y][x]) :
+            board[y][x] === 2 ? getPlayerSymbol(board[y][x]) : '';
+
+          container.appendChild(cell);
+        }
+        container.appendChild(document.createElement('br'));
+      }
+    }
+
+    show();
+  </script>
+</body>
+</html>
