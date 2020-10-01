@@ -31,10 +31,6 @@
       [0, 0, 0]
     ];
 
-    function clone(data) {
-      return JSON.parse(JSON.stringify(data));
-    }
-
     function getPlayerSymbol(color) {
       return color === 1 ? '❌' : '⭕️';
     }
@@ -113,23 +109,63 @@
       return false;
     }
 
+    function clone(data) {
+      return JSON.parse(JSON.stringify(data));
+    }
+
     function checkWillWin(board, color) {
       for (y = 0; y < 3; y++) {
         for (x  = 0; x < 3; x++) {
-          if (board[y][x] !== 0) {
+          if (board[y][x]) {
             continue;
           }
-          const tempBoard = clone(board);
-          tempBoard[y][x] = color;
-          if (checkWin(tempBoard, color)) {
-            return true;
+          const temp = clone(board);
+          temp[y][x] = color;
+          if (checkWin(temp, color)) {
+            return [x, y];
           }
         }
       }
-      return false;
+      return null;
     }
 
-    function move(x, y, color) {
+    function bestChoice(board, color) {
+      let p;
+      if (p = checkWillWin(board, color)) {
+        return {
+          point: p,
+          result: 1
+        }
+      }
+
+      let result = -2;
+      let point = null;
+      outer: for (let y = 0; y < 3; y++) {
+        for (let x = 0; x < 3; x++) {
+          if (board[y][x]) {
+            continue;
+          }
+          let temp = clone(board);
+          temp[y][x] = color;
+          let r = bestChoice(temp, 3 - color).result;
+
+          if (-r > result) {
+            result = -r;
+            point = [x, y];
+          }
+
+          if (result === 1) { // win-lost剪枝
+            break outer;
+          }
+        }
+      }
+      return {
+        point: point,
+        result: point ? result : 0
+      };
+    }
+
+    function userMove(x, y, color) {
       if (board[y][x] !== 0 || isGameOver) {
         return;
       }
@@ -141,9 +177,25 @@
         return;
       }
       nextColor = 3 - color;
+      console.log(bestChoice(board, nextColor));
       if (checkWillWin(board, nextColor)) {
         console.log(`${getPlayerSymbol(nextColor)} will win`);
       }
+      computerMove();
+    }
+
+    function computerMove() {
+      let choice = bestChoice(board, nextColor);
+      if (choice.point) {
+        board[choice.point[1]][choice.point[0]] = nextColor;
+      }
+      show();
+      if (checkWin(board, nextColor)) {
+        console.log(`${getPlayerSymbol(nextColor)} win`);
+        isGameOver = true;
+        return;
+      }
+      nextColor = 3 - nextColor;
     }
 
     function show() {
@@ -153,7 +205,7 @@
       for (let y = 0; y < 3; y++) {
         for (let x = 0; x < 3; x++) {
           let cell = document.createElement('div');
-          cell.addEventListener('click', () => move(x, y, nextColor))
+          cell.addEventListener('click', () => userMove(x, y, nextColor))
           cell.classList.add('cell');
           cell.textContent = board[y][x] === 1 ? getPlayerSymbol(board[y][x]) :
             board[y][x] === 2 ? getPlayerSymbol(board[y][x]) : '';
