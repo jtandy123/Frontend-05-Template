@@ -7,7 +7,34 @@
   <meta name="author" content="Andy">
   <title>Gobang</title>
   <style>
+    .cell {
+      width: 50px;
+      height: 50px;
+      display: inline-block;
+      vertical-align: middle;
+      background-color: green;
+      border: solid 1px white;
+    }
 
+    .cell.black::before {
+      content: "";
+      display: block;
+      width: 40px;
+      height: 40px;
+      border-radius: 20px;
+      margin: 5px;
+      background-color: black;
+    }
+
+    .cell.white::before {
+      content: "";
+      display: block;
+      width: 40px;
+      height: 40px;
+      border-radius: 20px;
+      margin: 5px;
+      background-color: white;
+    }
   </style>
 </head>
 
@@ -15,7 +42,192 @@
   <div id="board"></div>
 
   <script>
-    
+    let pattern = Array(15 * 15).fill(0);
+    let color = 1; // 0表示空，1表示黑棋，2表示白棋
+    let isGameOver = false;
+
+    function checkWin(pattern, color) {
+      // 横向
+      for (let y = 0; y < 15; y++) {
+        for (let x = 0; x < 11; x++) {
+          win = true;
+          for (let i = x; i < x + 5; i++) {
+            if (pattern[y * 15 + i] !== color) {
+              win = false;
+              break;
+            }
+          }
+          if (win) {
+            return true;
+          }
+        }
+      }
+
+      // 竖向
+      for (let x = 0; x < 15; x++) {
+        for (let y = 0; y < 11; y++) {
+          win = true;
+          for (let i = y; i < y + 5; i++) {
+            if (pattern[i * 15 + x] !== color) {
+              win = false;
+              break;
+            }
+          }
+          if (win) {
+            return true;
+          }
+        }
+      }
+
+      // 左上右下
+      for (let y = 0; y < 11; y++) {
+        for (let x = 0; x < 11; x++) {
+          win = true;
+          for (let i = y, j = x; j < x + 5; i++, j++) {
+            if (pattern[i * 15 + j] !== color) {
+              win = false;
+              break;
+            }
+          }
+          if (win) {
+            return true;
+          }
+        }
+      }
+
+      // 左下右上
+      for (let y = 14; y >= 4; y--) {
+        for (let x = 0; x < 11; x++) {
+          win = true;
+          for (let i = y, j = x; j < x + 5; i--, j++) {
+            if (pattern[i * 15 + j] !== color) {
+              win = false;
+              break;
+            }
+          }
+          if (win) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
+    function clone(pattern) {
+      return Object.create(pattern);
+    }
+
+    function checkWillWin(pattern, color) {
+      for (y = 0; y < 15; y++) {
+        for (x = 0; x < 15; x++) {
+          if (pattern[y * 15 + x]) {
+            continue
+          }
+          let tmp = clone(pattern);
+          tmp[y * 15 + x] = color;
+          if (checkWin(tmp, color)) {
+            return [x, y];
+          }
+        }
+      }
+      return null;
+    }
+
+    const MAX_DEPTH = 1;
+
+    function bestChoice(pattern, color, depth) {
+      let p;
+      if (p = checkWillWin(pattern, color)) {
+        return {
+          point: p,
+          result: 1
+        }
+      }
+
+      let result = -1;
+      let point = null;
+      outer: for (let y = 0; y < 15; y++) {
+        for (let x = 0; x < 15; x++) {
+          if (pattern[y * 15 + x]) {
+            continue;
+          }
+          if (depth === MAX_DEPTH) {
+            return {
+              point,
+              result
+            }
+          }
+
+          let tmp = clone(pattern);
+          tmp[y * 15 + x] = color;
+          let opp = bestChoice(tmp, 3 - color, depth + 1);
+          if (-opp.result >= result) {
+            point = [x, y];
+            result = -opp.result;
+          }
+          if (result == 1) {
+            break outer;
+          }
+        }
+      }
+      return {
+        point: point,
+        result: point ? result : 0
+      };
+    }
+
+    function userMove(x, y) {
+      const index = y * 15 + x;
+      if (pattern[index] || isGameOver) {
+        return;
+      }
+      pattern[index] = color;
+      show();
+      if (checkWin(pattern, color)) {
+        isGameOver = true;
+        console.log(`${color === 1 ? 'black' : 'white'} is winner!`);
+        return;
+      }
+      color = 3 - color;
+      // computerMove();
+    }
+
+    function computerMove() {
+      let choice = bestChoice(pattern, color, 0);
+      if (choice.point) {
+        pattern[choice.point[1] * 15 + choice.point[0]] = color;
+      }
+      if (checkWin(pattern, color)) {
+        isGameOver = true;
+        console.log(`${color === 1 ? 'black' : 'white'} is winner!`);
+      }
+      color = 3 - color;
+      show();
+    }
+
+    function show() {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      for (let y = 0; y < 15; y++) {
+        for (let x = 0; x < 15; x++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          const index = y * 15 + x;
+          if (pattern[index] === 1) {
+            cell.classList.add('black');
+          }
+          if (pattern[index] === 2) {
+            cell.classList.add('white');
+          }
+          cell.addEventListener('click', () => userMove(x, y))
+          board.appendChild(cell);
+        }
+        board.appendChild(document.createElement('br'));
+      }
+    }
+
+    show();
   </script>
 </body>
 
