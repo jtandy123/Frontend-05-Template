@@ -25,23 +25,23 @@ token包括: Number、Operator
 
 四则运算：  
 &lt;Expression&gt;::=   
-&emsp;&lt;AdditiveExpression&gt;<font color=red>&lt;EOF&gt;</font>
+&emsp;&lt;AdditiveExpression&gt;&lt;EOF&gt;
 
 <br/>
 
 &lt;AdditiveExpression&gt;::=   
 &emsp;&lt;MultiplicativeExpression&gt;   
-&emsp;|&lt;AdditiveExpression&gt;<font color=red>&lt;+&gt;</font>&lt;MultiplicativeExpression&gt;   
-&emsp;|&lt;AdditiveExpression&gt;<font color=red>&lt;-&gt;</font>&lt;MultiplicativeExpression&gt;
+&emsp;|&lt;AdditiveExpression&gt;&lt;+&gt;&lt;MultiplicativeExpression&gt;   
+&emsp;|&lt;AdditiveExpression&gt;&lt;-&gt;&lt;MultiplicativeExpression&gt;
 
 <br/>
  
 &lt;MultiplicativeExpression&gt;::=  
-&emsp;<font color=red>&lt;Number&gt;</font>   
-&emsp;|&lt;MultiplicativeExpression&gt;<font color=red>&lt;*&gt;&lt;Number&gt;</font>  
-&emsp;|&lt;MultiplicativeExpression&gt;<font color=red>&lt;/&gt;&lt;Number&gt;</font>
+&emsp;&lt;Number&gt;   
+&emsp;|&lt;MultiplicativeExpression&gt;&lt;*&gt;&lt;Number&gt;    
+&emsp;|&lt;MultiplicativeExpression&gt;&lt;/&gt;&lt;Number&gt;
 
-红色字体的为TerminalSymbol，终结符，直接从词法里面扫描出来的  
+&lt;EOF&gt;、&lt;+&gt;、&lt;-&gt;、&lt;Number&gt;、&lt;*&gt;、&lt;/&gt;为TerminalSymbol，终结符，直接从词法里面扫描出来的  
 其他的为NoneTerminalSymbol，非终结符，用终结符的组合定义出来的
    
 <br/>
