@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KMP?</title>
+</head>
+<body>
+  <script src='./kmp.js'></script>
+  <script>
+    function find(source, pattern) {
+      // step 1: 统计星号*数量
+      let starCount = 0;
+      let lastStarIndex = 0;
+      for (let i = 0; i < pattern.length; i++) {
+        if ('*' === pattern[i]) {
+          starCount++;
+          lastStarIndex = i;
+        }
+      }
+
+      if (starCount === 0) {
+        return kmp(source, pattern);
+      }
+
+      // step 2: 开始匹配第一个星号之前的部分
+      let i = 0; // pattern的下标
+      let lastIndex = 0; // source的下标
+
+      let patternPrefix = '';
+      let sourcePrefix = '';
+      for (i = 0; pattern[i] !== '*'; i++) {
+        patternPrefix += pattern[i];
+        sourcePrefix += source[i];
+      }
+      if (kmp(sourcePrefix, patternPrefix) === -1) {
+        return false;
+      }
+      lastIndex = i;
+
+      // step 3: 开始匹配第一个星号开始到最后一个星号之前的部分：分成多组，每组以星号开头到下一个星号之前的内容
+      for (let p = 0; p < starCount - 1; p++) {
+        // 获取每组第一个星号后面的内容
+        i++;
+        let subPattern = '';
+        while(pattern[i] !== '*') {
+          subPattern += pattern[i];
+          i++;
+        }
+
+        const subSource = source.substring(lastIndex, source.length - (pattern.length - 1 - lastStarIndex));
+        const index = kmp(subSource, subPattern);
+        if (index === -1) {
+          return false;
+        }
+        lastIndex = index + subPattern.length; 
+      }
+
+      // step 4: 最后一个星号可以尽可能多的匹配，所以只要匹配最后一个星号之后的内容，并且从最后往前匹配
+      let patternSuffix = '';
+      let sourceSuffix = '';
+      for (let j = 0; j <= source.length - 1 - lastIndex && pattern[pattern.length - 1 - j] !== '*'; j++) {
+        patternSuffix = pattern[pattern.length - 1 - j] + patternSuffix;
+        sourceSuffix = source[source.length - 1 - j] + sourceSuffix;
+      }
+      if (kmp(sourcePrefix, patternPrefix) === -1) {
+        return false;
+      }
+      return true;
+    }
+  </script>
+</body>
+</html>

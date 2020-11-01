@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>wildcard</title>
+</head>
+<body>
+  <script>
+    function find(source, pattern) {
+      // step 1: 统计星号*数量
+      let starCount = 0;
+      let lastStarIndex = 0;
+      for (let i = 0; i < pattern.length; i++) {
+        if ('*' === pattern[i]) {
+          starCount++;
+          lastStarIndex = i;
+        }
+      }
+      // 如果pattern中没有*，表明source和pattern的长度相等才可能匹配
+      if (starCount === 0) {
+        for (let i = 0; i < pattern.length; i++) {
+          if (source[i] !== pattern[i] && pattern[i] !== '?') {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      // step 2: 开始匹配第一个星号之前的部分
+      let i = 0; // pattern的下标
+      let lastIndex = 0; // source的下标
+      for (i = 0; pattern[i] !== '*'; i++) {
+        if (source[i] !== pattern[i] && pattern[i] !== '?') {
+          return false;
+        }
+      }
+      lastIndex = i;
+
+      // step 3: 开始匹配第一个星号开始到最后一个星号之前的部分：分成多组，每组以星号开头到下一个星号之前的内容
+      for (let p = 0; p < starCount - 1; p++) {
+        // 获取每组第一个星号后面的内容
+        i++;
+        let subPattern = '';
+        while(pattern[i] !== '*') {
+          subPattern += pattern[i];
+          i++;
+        }
+
+        let reg = new RegExp(subPattern.replace(/\?/g, '[\\s\\S]'), 'g');
+        reg.lastIndex = lastIndex;
+
+        const part = source.substring(0, source.length - (pattern.length - 1 - lastStarIndex));
+        if (!reg.exec(part)) {
+          return false;
+        }
+        lastIndex = reg.lastIndex;
+      }
+
+      // step 4: 最后一个星号可以尽可能多的匹配，所以只要匹配最后一个星号之后的内容，并且从最后往前匹配
+      for (let j = 0; j <= source.length - 1 - lastIndex && pattern[pattern.length - 1 - j] !== '*'; j++) {
+        if (source[source.length - 1 - j] !== pattern[pattern.length - 1 - j] && pattern[pattern.length - 1 - j] !== '?') {
+          return false;
+        }
+      }
+      return true;
+    }
+  </script>
+</body>
+</html>
