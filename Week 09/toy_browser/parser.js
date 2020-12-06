@@ -17,6 +17,7 @@ function addCSSRules(text) {
   rules.push(...ast.stylesheet.rules);
 }
 
+/*
 function match(element, selector) {
   if (!selector || !element.attributes) { // 文本元素没有attributes属性
     return false;
@@ -39,7 +40,45 @@ function match(element, selector) {
   }
   return false;
 }
+*/
 
+function match(element, selector) {
+  if (!selector || !element.attributes) {
+    return false;
+  }
+  
+  const tags = selector.match(/^\w+/g);
+  const ids = selector.match(/\#[-_a-zA-Z]+/g);
+  const classNames = selector.match(/\.[-_a-zA-Z]+/g);
+  
+  if (ids) {
+    const attr = element.attributes.filter(item => item.name === 'id')[0];
+    if (attr && attr.value === ids[0].replace('#', '')) {
+      return true;
+    }
+  }
+  
+  if (classNames) {
+    const attr = element.attributes.filter(item => item.name === 'class')[0];
+    if (!attr || !attr.value) {
+      return false;
+    }
+    const elementClassNames = attr.value.split(' ');
+    if (classNames.every(item => elementClassNames.includes(item.replace('.', '')))) {
+      return true;
+    } 
+  }
+  
+  if (tags) {
+    if (element.tagName === tags[0]) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
 function specificity(selector) {
   const p = [0, 0, 0, 0];
   const selectorParts = selector.split(' ');
@@ -49,6 +88,26 @@ function specificity(selector) {
     } else if (part.charAt(0) === '.') {
       p[2] += 1;
     } else {
+      p[3] += 1;
+    }
+  }
+  return p;
+}
+*/
+
+function specificity(selector) {
+  const p = [0, 0, 0, 0];
+  const selectorParts = selector.split(' ');
+  for (const part of selectorParts) {
+    const ids = part.match(/\#\w+/g);
+    const classes = part.match(/\.\w+/g);
+    if (ids) {
+      p[1] += ids.length;
+    }
+    if (classes) {
+      p[2] += classes.length;
+    }
+    if (part.charAt(0) !== '#' && part.charAt(0) !== '.') {
       p[3] += 1;
     }
   }
