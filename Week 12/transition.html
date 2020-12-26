@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .ball {
+      width: 10px;
+      height: 10px;
+      background-color: black;
+      border-radius: 5px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform: translateY(180px);
+    }
+  </style>
+</head>
+<body>
+  运动时间：<input id="t" value="15" /> s<br/>
+  初速度：<input id="vy" value="-33" /> px/s<br/>
+  水平速度：<input id="vx" value="33" /> px/s<br/>
+  重力加速度：<input id="g" value="10" /> px/s<sup>2</sup><br/>
+  <button onclick="createBall()">来一个球</button>
+  <script>
+    // v代表初速度，g代表加速度，t代表运动时间
+    function generateCubicBezier(v, g, t) {
+      const a = v / g;
+      const b = t + v / g;
+
+      return [[(a / 3 + (a + b) / 3 - a) / (b - a), (a * a / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a)],
+      [(b / 3 + (a + b) / 3 - a) / (b - a), (b * b / 3 + a * b * 2 / 3 - a * a) / (b * b - a * a)]]
+    }
+
+    function createBall() {
+      const ball = document.createElement('div');
+      const t = Number(document.getElementById('t').value);
+      const vx = Number(document.getElementById('vx').value);
+      const vy = Number(document.getElementById('vy').value);
+      const g = Number(document.getElementById('g').value);
+      ball.className = 'ball';
+      document.body.appendChild(ball);
+      ball.style.transition = `left linear ${t}s, top cubic-bezier(${generateCubicBezier(vy, g, t)}) ${t}s`;
+      setTimeout(function() {
+        ball.style.left = `${vx * t}px`;
+        ball.style.top = `${vy * t + 0.5 * g * t * t}px`;
+      }, 100);
+
+      setTimeout(function() {
+        document.body.removeChild(ball);
+      }, t * 1000);
+    }
+  </script>
+</body>
+</html>
