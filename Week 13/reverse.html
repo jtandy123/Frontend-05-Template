@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="a">
+    <span>1</span>
+    <p>2</p>
+    <a>3</a>
+    <div>4</div>
+  </div>
+
+  <script>
+    let element = document.getElementById('a');
+
+    function reverseChildren(element) {
+      let children = Array.prototype.slice.call(element.childNodes);
+
+      for (let child of children) {
+        element.removeChild(child);
+      }
+      // element.innerHTML = ''; // 替代上面的remove操作
+
+      children.reverse();
+
+      for (let child of children) {
+        element.appendChild(child);
+      }
+    }
+
+    function reverseChildren2(element) {
+      let l = element.childNodes.length; // 从后往前append，不影响element.childNodes这个living collection
+      while(l-- > 0) {
+        element.appendChild(element.childNodes[l]);
+      }
+    }
+
+    function reverseChildren3(element) {
+      let range = new Range();
+      range.selectNodeContents(element);
+
+      let fragment = range.extractContents();
+      let l = fragment.childNodes.length;
+      while(l-- > 0) {
+        fragment.appendChild(fragment.childNodes[l]);
+      }
+      element.appendChild(fragment);
+    }
+
+    reverseChildren(element);
+  </script>
+</body>
+
+</html>
