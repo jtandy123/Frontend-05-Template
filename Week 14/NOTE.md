@@ -56,7 +56,7 @@ attribute是字符串，property是对象
 ```html
 <a href=“//www.example.com”></a>
 <script>
-Var a = document.getElementByTagName(‘a’);
+var a = document.getElementByTagName(‘a’);
 a.href // “http://www.example.com”，这个URL是resolve过的结果
 a.getAttribute(‘href’); // “//www.example.com”，跟HTML代码中完全一致
 ```
