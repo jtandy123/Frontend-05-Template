@@ -19,7 +19,7 @@ Mocha单元测试：
 * 方式一：先webpack，然后dist里面的去做单元测试。依赖build
 * 方式二：babel register
     * 安装@babel/core、@babel/register
-```
+```json
 $ ./node_modules/.bin/mocha --require @babel/register
 
 // package.json
@@ -37,7 +37,7 @@ Mocha里面没有code coverage，必须得配合一些其他的工具
 code coverage：指测试到底覆盖了源文件里面的哪些代码   
 
 nyc相关配置：
-```
+```json
 {
   "name": "demo",
   "version": "1.0.0",
@@ -64,7 +64,7 @@ nyc相关配置：
 ```
 
 .babelrc
-```
+```json
 {
   "presets": ["@babel/preset-env"],
   "plugins": ["istanbul"],
@@ -73,7 +73,7 @@ nyc相关配置：
 ```
 
 .nycrc
-```
+```json
 {
   "extends": "@istanbuljs/nyc-config-babel"
 }
