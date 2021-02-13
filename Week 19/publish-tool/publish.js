@@ -1,60 +1,40 @@
 const http = require('http');
 const fs = require('fs');
 const archiver = require('archiver');
+const child_process = require('child_process');
+const querystring = require('querystring');
 
-/*
-fs.stat('./sample.html', (err, stats) => {
+// 1. 登录，打开https://github.com/login/oauth/authorize?client_id=xxx
+child_process.exec(`open https://github.com/login/oauth/authorize?client_id=Iv1.4cb620e7c7fe7ac1`);
+
+// 3. 创建本地server，接收token，后点击发布
+http.createServer((request, response) => {
+  const query = querystring.parse(request.url.match(/^\/\?([\s\S]+)$/)[1]);
+  publish(query.token);
+}).listen(8083);
+
+function publish(token) {
   const request = http.request({
     hostname: '127.0.0.1',
     port: 8082,
     method: 'POST',
+    path: `/publish?token=${token}`,
     headers: {
-      'Content-Type': 'application/octet-stream',
-      'Content-Length': stats.size
+      'Content-Type': 'application/octet-stream'
     }
   }, response => {
     console.log(response);
   });
+
+  const archive = archiver('zip', {
+    zlib: {
+      level: 9
+    }
+  });
   
-  const file = fs.createReadStream('./sample.html');
-  file.pipe(request);
-  
-  file.on('end', () => request.end());
+  archive.directory('./sample/', false);
+  archive.finalize();
+  archive.pipe(request);
 
-// file.on('data', chunk => {
-//   console.log(chunk);
-//   console.log(chunk.toString());
-//   request.write(chunk);
-// });
-
-// file.on('end', chunk => {
-//   console.log('read finished');
-//   request.end(chunk);
-// });
-});
-*/
-
-const request = http.request({
-  hostname: '127.0.0.1',
-  port: 8082,
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/octet-stream'
-  }
-}, response => {
-  console.log(response);
-});
-
-// let file = fs.createReadStream('./sample.html');
-
-const archive = archiver('zip', {
-  zlib: {
-    level: 9
-  }
-});
-
-archive.directory('./sample/', false);
-
-archive.finalize();
-
-archive.pipe(request);
+  request.end();
+}
